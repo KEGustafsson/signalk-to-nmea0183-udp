@@ -24,6 +24,7 @@ export default function (_app: SignalKApp): SentenceEncoder {
     ): string | undefined {
       const datetime = nmea.formatDatetime(datetime8601)
       if (!position) return undefined
+      if (!datetime.time) return undefined
       return nmea.toSentence([
         '$GPGLL',
         nmea.toNmeaDegreesLatitude(position.latitude),

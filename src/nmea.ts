@@ -101,7 +101,12 @@ export function toNmeaDegreesLatitude(inVal: unknown): string {
     use in an NMEA0183 sentence. (e.g. DDMM.MMMM)
   */
 
-  if (typeof inVal !== 'number' || inVal < -90 || inVal > 90) {
+  if (
+    typeof inVal !== 'number' ||
+    !Number.isFinite(inVal) ||
+    inVal < -90 ||
+    inVal > 90
+  ) {
     throw new Error('invalid input to toNmeaDegreesLatitude: ' + inVal)
   }
 
@@ -123,7 +128,12 @@ export function toNmeaDegreesLongitude(inVal: unknown): string {
     use in an NMEA0183 sentence. (e.g. DDDMM.MMMM)
   */
 
-  if (typeof inVal !== 'number' || inVal < -180 || inVal > 180) {
+  if (
+    typeof inVal !== 'number' ||
+    !Number.isFinite(inVal) ||
+    inVal < -180 ||
+    inVal > 180
+  ) {
     throw new Error('invalid input to toNmeaDegreesLongitude: ' + inVal)
   }
 
@@ -153,6 +163,10 @@ function toPositiveRadians(d: number): number {
 
 export function radsToPositiveDeg(r: number): number {
   return radsToDeg(toPositiveRadians(r))
+}
+
+export function radsToRoundedPositiveDegString(r: number): string {
+  return String(Math.round(radsToPositiveDeg(r)) % 360)
 }
 
 export interface FormattedDatetime {
@@ -196,7 +210,7 @@ export function formatDatetime(datetime8601: unknown): FormattedDatetime {
   // Require an explicit timezone designator (Z or ±HH:MM). Without one the
   // Date constructor parses the string as LOCAL time, making the derived UTC
   // components environment-dependent.
-  if (!/(Z|[+-]\d{2}:\d{2})$/i.test(datetime8601)) {
+  if (!/(Z|[+-]\d{2}:?\d{2})$/i.test(datetime8601)) {
     return empty
   }
 

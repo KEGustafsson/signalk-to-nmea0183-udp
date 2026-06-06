@@ -32,6 +32,24 @@ import {
 import type { Position } from '@signalk/server-api'
 import type { SentenceEncoder, SignalKApp } from '../types/plugin'
 
+const NMEA_RESERVED = /[,*$\r\n]/g
+const MAX_NMEA_FIELD_LEN = 20
+
+function sanitizeNmeaField(
+  value: number | string | null | undefined
+): string | number {
+  if (typeof value === 'number') {
+    return Number.isFinite(value) ? value : ''
+  }
+  if (typeof value !== 'string') {
+    return ''
+  }
+  const stripped = value.replace(NMEA_RESERVED, '')
+  return stripped.length > MAX_NMEA_FIELD_LEN
+    ? stripped.slice(0, MAX_NMEA_FIELD_LEN)
+    : stripped
+}
+
 export default function (_app: SignalKApp): SentenceEncoder {
   return {
     sentence: 'GGA',
@@ -80,19 +98,17 @@ export default function (_app: SignalKApp): SentenceEncoder {
       }
 
       const datetime = formatDatetime(datetimeInput)
+      if (!datetime.time) {
+        return undefined
+      }
 
       if (!position) {
         console.error(`[signalk-to-nmea0183] GGA: no position, not converting`)
         return undefined
       }
 
-      if (gnssDifferentialAge === null || gnssDifferentialAge === undefined) {
-        gnssDifferentialAge = ''
-      }
-
-      if (!gnssDifferentialReference) {
-        gnssDifferentialReference = ''
-      }
+      const differentialAge = sanitizeNmeaField(gnssDifferentialAge)
+      const differentialReference = sanitizeNmeaField(gnssDifferentialReference)
 
       if (
         typeof gnssMethodQuality === 'number' &&
@@ -143,8 +159,8 @@ export default function (_app: SignalKApp): SentenceEncoder {
         'M',
         gnssgeoidalSeparation.toFixed(1),
         'M',
-        gnssDifferentialAge as string | number,
-        gnssDifferentialReference as string
+        differentialAge,
+        differentialReference
       ])
     }
   }

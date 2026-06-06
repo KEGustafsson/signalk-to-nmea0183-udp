@@ -7,7 +7,8 @@ export default function (_app: SignalKApp): SentenceEncoder {
     sentence: 'HDT',
     title: 'HDT - Heading True',
     keys: ['navigation.headingTrue'],
-    f: function (heading: number): string {
+    f: function (heading: number): string | undefined {
+      if (!Number.isFinite(heading)) return undefined
       return nmea.toSentence([
         '$IIHDT',
         nmea.radsToPositiveDeg(heading).toFixed(1),

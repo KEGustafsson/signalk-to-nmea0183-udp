@@ -9,7 +9,8 @@ import {
   msToKM,
   mToNm,
   fixAngle,
-  radsToPositiveDeg
+  radsToPositiveDeg,
+  radsToRoundedPositiveDegString
 } from '../src/nmea'
 
 describe('nmea', function () {
@@ -43,6 +44,13 @@ describe('nmea', function () {
       assert.throws(
         function () {
           toNmeaDegreesLatitude(undefined)
+        },
+        Error,
+        'expected Error'
+      )
+      assert.throws(
+        function () {
+          toNmeaDegreesLatitude(NaN)
         },
         Error,
         'expected Error'
@@ -97,6 +105,13 @@ describe('nmea', function () {
       )
       assert.throws(
         function () {
+          toNmeaDegreesLongitude(NaN)
+        },
+        Error,
+        'expected Error'
+      )
+      assert.throws(
+        function () {
           toNmeaDegreesLongitude('hello world')
         },
         Error,
@@ -121,6 +136,20 @@ describe('nmea', function () {
 
     it('handles timezones with +02:00 offset', function () {
       assert.deepEqual(formatDatetime('2025-04-27T14:34:56+02:00'), {
+        date: '270425',
+        day: '27',
+        hours: '12',
+        minutes: '34',
+        month: '04',
+        seconds: '56',
+        centiseconds: '00',
+        time: '123456.00',
+        year: '2025'
+      })
+    })
+
+    it('handles ISO 8601 basic timezone offsets without a colon', function () {
+      assert.deepEqual(formatDatetime('2025-04-27T14:34:56+0200'), {
         date: '270425',
         day: '27',
         hours: '12',
@@ -356,6 +385,16 @@ describe('nmea', function () {
     })
     it('keeps positives unchanged below 2*PI', function () {
       assert.ok(Math.abs(radsToPositiveDeg(Math.PI / 4) - 45) < 1e-9)
+    })
+  })
+
+  describe('radsToRoundedPositiveDegString()', function () {
+    it('rounds into the normalized 0..359 bearing range', function () {
+      assert.equal(radsToRoundedPositiveDegString((359.6 * Math.PI) / 180), '0')
+      assert.equal(
+        radsToRoundedPositiveDegString((359.4 * Math.PI) / 180),
+        '359'
+      )
     })
   })
 })

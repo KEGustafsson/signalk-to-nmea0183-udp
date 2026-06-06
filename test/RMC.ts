@@ -5,12 +5,12 @@ import { createAppWithPlugin } from './testutil'
 describe('RMC', function () {
   it('works without datetime & magneticVariation', (done) => {
     const onEmit = (_event: string, value: unknown): void => {
-      assert.equal(value, '$GPRMC,,A,0600.0000,N,00500.0000,E,1.9,114.6,,,*14')
+      assert.equal(value, '$GPRMC,,V,0600.0000,N,00500.0000,E,1.9,114.6,,,*03')
       done()
     }
     const app = createAppWithPlugin(onEmit, 'RMC')
-    app.streambundle.getSelfStream('navigation.speedOverGround').push('1')
-    app.streambundle.getSelfStream('navigation.courseOverGroundTrue').push('2')
+    app.streambundle.getSelfStream('navigation.speedOverGround').push(1)
+    app.streambundle.getSelfStream('navigation.courseOverGroundTrue').push(2)
     app.streambundle
       .getSelfStream('navigation.position')
       .push({ longitude: 5, latitude: 6 })
@@ -20,13 +20,13 @@ describe('RMC', function () {
     const onEmit = (_event: string, value: unknown): void => {
       assert.equal(
         value,
-        '$GPRMC,,A,3749.6038,N,12225.2480,W,1.9,114.6,,180.0,E*6B'
+        '$GPRMC,,V,3749.6038,N,12225.2480,W,1.9,114.6,,180.0,E*7C'
       )
       done()
     }
     const app = createAppWithPlugin(onEmit, 'RMC')
-    app.streambundle.getSelfStream('navigation.speedOverGround').push('1')
-    app.streambundle.getSelfStream('navigation.courseOverGroundTrue').push('2')
+    app.streambundle.getSelfStream('navigation.speedOverGround').push(1)
+    app.streambundle.getSelfStream('navigation.courseOverGroundTrue').push(2)
     app.streambundle.getSelfStream('navigation.magneticVariation').push(Math.PI)
     app.streambundle
       .getSelfStream('navigation.position')
@@ -35,12 +35,12 @@ describe('RMC', function () {
 
   it('ignores a too large longitude', (done) => {
     const onEmit = (_event: string, value: unknown): void => {
-      assert.equal(value, '$GPRMC,,A,3749.6038,N,12225.2480,W,1.9,114.6,,,*09')
+      assert.equal(value, '$GPRMC,,V,3749.6038,N,12225.2480,W,1.9,114.6,,,*1E')
       done()
     }
     const app = createAppWithPlugin(onEmit, 'RMC')
-    app.streambundle.getSelfStream('navigation.speedOverGround').push('1')
-    app.streambundle.getSelfStream('navigation.courseOverGroundTrue').push('2')
+    app.streambundle.getSelfStream('navigation.speedOverGround').push(1)
+    app.streambundle.getSelfStream('navigation.courseOverGroundTrue').push(2)
     app.streambundle
       .getSelfStream('navigation.position')
       .push({ longitude: -222.4208, latitude: 37.82673 })
@@ -106,7 +106,7 @@ describe('RMC', function () {
   // position and time data.
   it('emits RMC with empty COG when COG is unavailable and SOG=0', (done) => {
     const onEmit = (_event: string, value: unknown): void => {
-      assert.equal(value, '$GPRMC,,A,0600.0000,N,00500.0000,E,0.0,,,,*30')
+      assert.equal(value, '$GPRMC,,V,0600.0000,N,00500.0000,E,0.0,,,,*27')
       done()
     }
     const app = createAppWithPlugin(onEmit, 'RMC')
@@ -119,11 +119,11 @@ describe('RMC', function () {
 
   it('emits RMC with empty COG when COG is unavailable and SOG>0', (done) => {
     const onEmit = (_event: string, value: unknown): void => {
-      assert.equal(value, '$GPRMC,,A,0600.0000,N,00500.0000,E,1.9,,,,*38')
+      assert.equal(value, '$GPRMC,,V,0600.0000,N,00500.0000,E,1.9,,,,*2F')
       done()
     }
     const app = createAppWithPlugin(onEmit, 'RMC')
-    app.streambundle.getSelfStream('navigation.speedOverGround').push('1')
+    app.streambundle.getSelfStream('navigation.speedOverGround').push(1)
     // navigation.courseOverGroundTrue is never pushed
     app.streambundle
       .getSelfStream('navigation.position')
@@ -137,13 +137,13 @@ describe('RMC', function () {
     const onEmit = (_event: string, value: unknown): void => {
       assert.equal(
         value,
-        '$GPRMC,,A,3749.6038,N,12225.2480,W,1.9,114.6,,180.0,W*79'
+        '$GPRMC,,V,3749.6038,N,12225.2480,W,1.9,114.6,,180.0,W*6E'
       )
       done()
     }
     const app = createAppWithPlugin(onEmit, 'RMC')
-    app.streambundle.getSelfStream('navigation.speedOverGround').push('1')
-    app.streambundle.getSelfStream('navigation.courseOverGroundTrue').push('2')
+    app.streambundle.getSelfStream('navigation.speedOverGround').push(1)
+    app.streambundle.getSelfStream('navigation.courseOverGroundTrue').push(2)
     app.streambundle
       .getSelfStream('navigation.magneticVariation')
       .push(-Math.PI)

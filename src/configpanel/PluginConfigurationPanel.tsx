@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback, useRef } from 'react'
 import type { CSSProperties } from 'react'
 
 // ---------------------------------------------------------------------------
@@ -238,19 +238,18 @@ export default function PluginConfigurationPanel({
   const [udpAddress, setUdpAddress] = useState<string>(
     () => cfg.udp?.address ?? DEFAULT_UDP_ADDRESS
   )
-  const [udpPort, setUdpPort] = useState<number>(
-    () => cfg.udp?.port ?? DEFAULT_UDP_PORT
+  const [udpPort, setUdpPort] = useState<string>(() =>
+    String(cfg.udp?.port ?? DEFAULT_UDP_PORT)
   )
   const [sentences, setSentences] = useState<SentenceInfo[]>([])
   const [pathStatus, setPathStatus] = useState<Record<string, PathStatus>>({})
   const [status, setStatus] = useState('')
+  const dirtyRef = useRef(false)
+  const syncedConfigRef = useRef(configuration !== undefined)
 
   useEffect(() => {
-    Promise.all([
-      fetch('/skServer/plugins').then((r) => r.json() as Promise<PluginMeta[]>),
-      fetch('/signalk/v1/api/vessels/self').then((r) => r.json())
-    ])
-      .then(([plugins, vessel]) => {
+    fetchJson<PluginMeta[]>('/skServer/plugins')
+      .then((plugins) => {
         const p = plugins.find((pl) => pl.id === 'sk-to-nmea0183-udp')
         if (p) {
           const schema = typeof p.schema === 'function' ? p.schema() : p.schema
@@ -278,9 +277,14 @@ export default function PluginConfigurationPanel({
             }
           }
         }
+      })
+      .catch(() => setStatus('Could not load sentence list'))
+
+    fetchJson<unknown>('/signalk/v1/api/vessels/self')
+      .then((vessel) => {
         setPathStatus(flattenVessel(vessel))
       })
-      .catch(() => {})
+      .catch(() => setStatus('Could not load path status'))
     // `cfg` comes from props; we only want this to run on mount so a
     // re-render with a different `configuration` reference does not
     // overwrite in-progress edits.
@@ -297,13 +301,41 @@ export default function PluginConfigurationPanel({
     return () => clearInterval(id)
   }, [])
 
+  useEffect(() => {
+    if (
+      configuration === undefined ||
+      dirtyRef.current ||
+      syncedConfigRef.current
+    ) {
+      return
+    }
+
+    setUdpAddress(configuration.udp?.address ?? DEFAULT_UDP_ADDRESS)
+    setUdpPort(String(configuration.udp?.port ?? DEFAULT_UDP_PORT))
+
+    if (Array.isArray(configuration.conversions)) {
+      setConversions(configuration.conversions)
+      syncedConfigRef.current = true
+    } else if (sentences.length > 0) {
+      setConversions(migrateLegacyConversions(configuration, sentences))
+      syncedConfigRef.current = true
+    } else if (Object.keys(configuration).length === 0) {
+      setConversions([])
+      syncedConfigRef.current = true
+    }
+  }, [configuration, sentences])
+
+  const markDirty = (): void => {
+    dirtyRef.current = true
+  }
+
   const doSave = useCallback(() => {
     const clean = conversions.filter((c) => c.sentence)
     save({
       conversions: clean,
       udp: {
         address: udpAddress || DEFAULT_UDP_ADDRESS,
-        port: udpPort || DEFAULT_UDP_PORT
+        port: parseUdpPort(udpPort)
       }
     })
     setConversions(clean)
@@ -311,18 +343,24 @@ export default function PluginConfigurationPanel({
     setTimeout(() => setStatus(''), 3000)
   }, [conversions, udpAddress, udpPort, save])
 
-  const addRow = (): void =>
+  const addRow = (): void => {
+    markDirty()
     setConversions([...conversions, { sentence: '', throttle: 0 }])
-  const removeRow = (i: number): void =>
+  }
+  const removeRow = (i: number): void => {
+    markDirty()
     setConversions(conversions.filter((_, j) => j !== i))
+  }
   const updateRow = <K extends keyof Conversion>(
     i: number,
     field: K,
     value: Conversion[K]
-  ): void =>
+  ): void => {
+    markDirty()
     setConversions(
       conversions.map((c, j) => (j === i ? { ...c, [field]: value } : c))
     )
+  }
   const getSentenceInfo = (key: string): SentenceInfo | undefined =>
     sentences.find((s) => s.key === key)
 
@@ -347,7 +385,10 @@ export default function PluginConfigurationPanel({
               style={S.input}
               type="text"
               value={udpAddress}
-              onChange={(e) => setUdpAddress(e.target.value)}
+              onChange={(e) => {
+                markDirty()
+                setUdpAddress(e.target.value)
+              }}
               placeholder={DEFAULT_UDP_ADDRESS}
             />
           </div>
@@ -361,12 +402,8 @@ export default function PluginConfigurationPanel({
               step={1}
               value={udpPort}
               onChange={(e) => {
-                const v = parseInt(e.target.value, 10)
-                setUdpPort(
-                  Number.isInteger(v) && v >= 1 && v <= 65535
-                    ? v
-                    : DEFAULT_UDP_PORT
-                )
+                markDirty()
+                setUdpPort(e.target.value)
               }}
               placeholder={String(DEFAULT_UDP_PORT)}
             />
@@ -447,6 +484,7 @@ export default function PluginConfigurationPanel({
                     step={1}
                     value={conv.throttle ?? 0}
                     onChange={(e) => {
+                      markDirty()
                       const v = parseInt(e.target.value, 10)
                       updateRow(
                         i,
@@ -513,6 +551,21 @@ function parsePaths(oneOfEntry: OneOfEntry): string[] {
   const match = /\[(.+)\]$/.exec(oneOfEntry.title)
   if (!match) return []
   return match[1]!.split(', ').map((p) => p.replace(/\([^)]*\)$/, ''))
+}
+
+async function fetchJson<T>(url: string): Promise<T> {
+  const response = await fetch(url)
+  if (!response.ok) {
+    throw new Error(`HTTP ${response.status}`)
+  }
+  return (await response.json()) as T
+}
+
+function parseUdpPort(value: string): number {
+  const port = parseInt(value, 10)
+  return Number.isInteger(port) && port >= 1 && port <= 65535
+    ? port
+    : DEFAULT_UDP_PORT
 }
 
 // Lift a legacy flat-boolean options object into the array shape so

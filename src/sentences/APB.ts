@@ -46,7 +46,14 @@ export default function (_app: SignalKApp): SentenceEncoder {
       bearingTrue: number,
       nextPoint: NextPoint | null | undefined,
       magneticVariation: number | null | undefined
-    ): string {
+    ): string | undefined {
+      if (
+        !Number.isFinite(xte) ||
+        !Number.isFinite(originToDest) ||
+        !Number.isFinite(bearingTrue)
+      ) {
+        return undefined
+      }
       const variation = Number.isFinite(magneticVariation)
         ? (magneticVariation as number)
         : 0
@@ -66,12 +73,12 @@ export default function (_app: SignalKApp): SentenceEncoder {
         'N',
         'V',
         'V',
-        bearingOriginToDestMag.toFixed(0),
+        String(Math.round(bearingOriginToDestMag) % 360),
         'M',
         waypointId,
-        bearingToDestMag.toFixed(0),
+        String(Math.round(bearingToDestMag) % 360),
         'M',
-        bearingToDestMag.toFixed(0),
+        String(Math.round(bearingToDestMag) % 360),
         'M'
       ])
     }

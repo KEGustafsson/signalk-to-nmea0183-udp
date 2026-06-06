@@ -28,7 +28,14 @@ export default function (_app: SignalKApp): SentenceEncoder {
       originToDest: number,
       bearingTrue: number,
       nextPoint: NextPoint | null | undefined
-    ): string {
+    ): string | undefined {
+      if (
+        !Number.isFinite(xte) ||
+        !Number.isFinite(originToDest) ||
+        !Number.isFinite(bearingTrue)
+      ) {
+        return undefined
+      }
       const waypointId = generateWaypointName(nextPoint)
       return nmea.toSentence([
         '$IIAPB',
@@ -39,12 +46,12 @@ export default function (_app: SignalKApp): SentenceEncoder {
         'N',
         'V',
         'V',
-        nmea.radsToPositiveDeg(originToDest).toFixed(0),
+        nmea.radsToRoundedPositiveDegString(originToDest),
         'T',
         waypointId,
-        nmea.radsToPositiveDeg(bearingTrue).toFixed(0),
+        nmea.radsToRoundedPositiveDegString(bearingTrue),
         'T',
-        nmea.radsToPositiveDeg(bearingTrue).toFixed(0),
+        nmea.radsToRoundedPositiveDegString(bearingTrue),
         'T'
       ])
     }

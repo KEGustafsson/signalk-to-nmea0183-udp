@@ -212,6 +212,29 @@ describe('RMB', function () {
     pushRmbStreams(app, {})
   })
 
+  it('does not emit when waypoint range is negative', (done) => {
+    let emitted = false
+    const onEmit = (): void => {
+      emitted = true
+    }
+    const app = createAppWithPlugin(onEmit, 'RMB')
+    pushRmbStreams(app, { distance: -1 })
+    setTimeout(() => {
+      assert.equal(emitted, false)
+      done()
+    }, 50)
+  })
+
+  it('rounds bearing 359.6 to 0 instead of 360', (done) => {
+    const onEmit = (_event: string, value: unknown): void => {
+      const fields = parseRmb(value as string)
+      assert.equal(fields.bearing, '0')
+      done()
+    }
+    const app = createAppWithPlugin(onEmit, 'RMB')
+    pushRmbStreams(app, { bearingTrue: (359.6 * Math.PI) / 180 })
+  })
+
   it('does not emit when nextPoint has no position', (done) => {
     let emitted = false
     const onEmit = (): void => {

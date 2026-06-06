@@ -120,4 +120,31 @@ describe('APB (magnetic)', function () {
       magneticVariation: (-10 * Math.PI) / 180
     })
   })
+
+  it('rounds magnetic bearing 359.6 to 0 instead of 360', (done) => {
+    const onEmit = (_event: string, value: unknown): void => {
+      const fields = parseApb(value as string)
+      assert.equal(fields.headingToSteer, '0')
+      done()
+    }
+    const app = createAppWithPlugin(onEmit, 'APB')
+    pushStreams(app, {
+      bearingTrackTrue: 0,
+      bearingTrue: (359.6 * Math.PI) / 180,
+      magneticVariation: 0
+    })
+  })
+
+  it('does not emit when required numeric guidance is invalid', (done) => {
+    let emitted = false
+    const onEmit = (): void => {
+      emitted = true
+    }
+    const app = createAppWithPlugin(onEmit, 'APB')
+    pushStreams(app, { bearingTrue: NaN })
+    setTimeout(() => {
+      assert.equal(emitted, false)
+      done()
+    }, 50)
+  })
 })

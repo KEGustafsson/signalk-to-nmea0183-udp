@@ -44,11 +44,13 @@
     "prettier:check": "prettier --check .",
     "prettier": "prettier --write .",
     "format": "npm run prettier",
-    "prepublishOnly": "npm run build && npm run build:config"
+    "prepublishOnly": "npm test && npm run typecheck && npm run build && npm run build:config"
   },
   "keywords": [
     "signalk-node-server-plugin",
-    "signalk-plugin-configurator"
+    "signalk-plugin-configurator",
+    "nmea0183",
+    "udp"
   ],
   "author": "teppo.kurki@iki.fi",
   "license": "Apache-2.0",
@@ -74,9 +76,14 @@
     "webpack-cli": "^7.0.3",
     "ws": "^8.18.0"
   },
+  "overrides": {
+    "diff": "^8.0.3",
+    "serialize-javascript": "^7.0.5"
+  },
   "c8": {
     "extension": [
-      ".ts"
+      ".ts",
+      ".tsx"
     ],
     "include": [
       "src/**/*.ts"

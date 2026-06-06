@@ -74,6 +74,9 @@ export interface SignalKPluginSchemaProperty {
   description?: string
   type?: string
   default?: unknown
+  minimum?: number
+  maximum?: number
+  multipleOf?: number
   required?: string[]
   properties?: Record<string, SignalKPluginSchemaProperty>
   items?: SignalKPluginSchemaProperty
@@ -126,6 +129,7 @@ export interface PluginOptions {
  */
 export interface SignalKPlugin extends Plugin {
   schema: () => SignalKPluginSchema
+  start: (config?: object, restart?: (newConfiguration: object) => void) => void
   sentences: Record<string, SentenceEncoder>
   unsubscribes: Array<() => void>
 }

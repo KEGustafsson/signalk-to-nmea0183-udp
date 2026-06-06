@@ -53,7 +53,7 @@ nc -ul 10110        # or: socat -u UDP-RECV:10110 -
 
 ## Supported sentences
 
-Each sentence is independently toggleable and has its own throttle
+Each configured row selects one sentence and can have its own throttle
 (ms). Leave the throttle at `0` to send on every source update.
 
 ### Course and waypoints

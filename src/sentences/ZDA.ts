@@ -17,8 +17,9 @@ export default function (_app: SignalKApp): SentenceEncoder {
   return {
     title: 'ZDA - UTC time and date',
     keys: ['navigation.datetime'],
-    f: function (datetime8601: unknown): string {
+    f: function (datetime8601: unknown): string | undefined {
       const datetime = nmea.formatDatetime(datetime8601)
+      if (!datetime.time || !datetime.date) return undefined
       return nmea.toSentence([
         '$IIZDA',
         datetime.time,

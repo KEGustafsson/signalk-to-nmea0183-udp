@@ -169,12 +169,13 @@ describe('schema', function () {
       )
     )
     const dbt = oneOfEntries(plug.schema()).find((e) => e.const === 'DBT')!
-    assert.ok(dbt.title.includes('\u274E'), 'expected null-value indicator')
+    assert.ok(dbt.title.includes('\u2753'), 'expected null-value indicator')
   })
 
   it('includes a legend in the description', function () {
     const desc = conversionsProp(schema).description!
     assert.ok(desc.includes('\uD83D\uDC4D'), 'legend missing present indicator')
+    assert.ok(desc.includes('\u2753'), 'legend missing null-value indicator')
     assert.ok(desc.includes('\u274C'), 'legend missing not-present indicator')
   })
 

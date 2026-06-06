@@ -1,5 +1,6 @@
 import * as assert from 'assert'
 
+import { toSentence } from '../src/nmea'
 import { createAppWithPlugin } from './testutil'
 
 describe('GGA', function () {
@@ -49,6 +50,56 @@ describe('GGA', function () {
     app.streambundle
       .getSelfStream('navigation.gnss.differentialReference')
       .push('0031')
+    app.streambundle
+      .getSelfStream('navigation.position')
+      .push({ longitude: -122.03782631066667, latitude: 37.39109795066667 })
+  })
+
+  it('sanitizes differential fields before framing the sentence', (done) => {
+    const onEmit = (_event: string, value: unknown): void => {
+      assert.equal(
+        value,
+        toSentence([
+          '$GPGGA',
+          '172814.00',
+          '3723.4659,N',
+          '12202.2696,W',
+          2,
+          6,
+          '1.2',
+          '18.9',
+          'M',
+          '-25.7',
+          'M',
+          '2BAD',
+          '0031REF'
+        ])
+      )
+      done()
+    }
+    const app = createAppWithPlugin(onEmit, 'GGA')
+    app.streambundle
+      .getSelfStream('navigation.datetime')
+      .push('2015-12-05T17:28:14Z')
+    app.streambundle
+      .getSelfStream('navigation.gnss.methodQuality')
+      .push('DGNSS fix')
+    app.streambundle.getSelfStream('navigation.gnss.satellites').push(6)
+    app.streambundle
+      .getSelfStream('navigation.gnss.horizontalDilution')
+      .push(1.2)
+    app.streambundle
+      .getSelfStream('navigation.gnss.antennaAltitude')
+      .push(18.893)
+    app.streambundle
+      .getSelfStream('navigation.gnss.geoidalSeparation')
+      .push(-25.669)
+    app.streambundle
+      .getSelfStream('navigation.gnss.differentialAge')
+      .push('2,*$\r\nBAD')
+    app.streambundle
+      .getSelfStream('navigation.gnss.differentialReference')
+      .push('0031,REF*$\r\n')
     app.streambundle
       .getSelfStream('navigation.position')
       .push({ longitude: -122.03782631066667, latitude: 37.39109795066667 })

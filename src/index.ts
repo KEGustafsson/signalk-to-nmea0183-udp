@@ -60,7 +60,7 @@ function combineStreamsWith(
 // suffix back out of each oneOf title) and the schema-builder's
 // legend, so they live as module-level constants.
 const INDICATOR_OK = '\uD83D\uDC4D'
-const INDICATOR_NULL = '\u274E'
+const INDICATOR_NULL = '\u2753'
 const INDICATOR_MISSING = '\u274C'
 
 // Default UDP destination for the generated NMEA0183 sentences. Sentences
@@ -117,6 +117,9 @@ function buildSchema(
             type: 'number',
             title: 'UDP port',
             description: 'Destination UDP port.',
+            minimum: 1,
+            maximum: 65535,
+            multipleOf: 1,
             default: DEFAULT_UDP_PORT
           }
         }
@@ -139,6 +142,8 @@ function buildSchema(
               description:
                 'Minimum milliseconds between sends. 0 or empty = no throttling.',
               type: 'number',
+              minimum: 0,
+              multipleOf: 1,
               default: 0
             }
           }
@@ -158,7 +163,28 @@ function resolveConversions(
   sentences: Record<string, SentenceEncoder>,
   debug: (msg: unknown) => void
 ): Conversion[] {
-  if (Array.isArray(options.conversions)) return options.conversions
+  if (Array.isArray(options.conversions)) {
+    const valid: Conversion[] = []
+    for (const conv of options.conversions) {
+      if (
+        !conv ||
+        typeof conv !== 'object' ||
+        typeof conv.sentence !== 'string'
+      ) {
+        console.error('sk-to-nmea0183-udp: invalid conversion entry, skipping')
+        continue
+      }
+      const rawThrottle = Number(conv.throttle ?? 0)
+      valid.push({
+        sentence: conv.sentence,
+        throttle:
+          Number.isFinite(rawThrottle) && rawThrottle > 0
+            ? Math.trunc(rawThrottle)
+            : 0
+      })
+    }
+    return valid
+  }
 
   const migrated: Conversion[] = Object.keys(sentences)
     .filter((name) => options[name])
@@ -191,7 +217,9 @@ const createPlugin = function (app: SignalKApp): SignalKPlugin {
     schema: () => buildSchema(app, plugin.sentences),
     unsubscribes: [],
     sentences: {},
-    start: function (options: PluginOptions): void {
+    start: function (config: object = {}): void {
+      const options = config as PluginOptions
+      plugin.stop()
       const udpAddress = options.udp?.address || DEFAULT_UDP_ADDRESS
       // Coerce to an integer and enforce the valid destination port range;
       // fall back to the default for missing / NaN / out-of-range values so

@@ -24,7 +24,14 @@ export default function (_app: SignalKApp): SentenceEncoder {
       headingTrue: number,
       magneticVariation: number,
       speedThroughWater: number
-    ): string {
+    ): string | undefined {
+      if (
+        !Number.isFinite(headingTrue) ||
+        !Number.isFinite(magneticVariation) ||
+        !Number.isFinite(speedThroughWater)
+      ) {
+        return undefined
+      }
       const headingMagnetic = headingTrue - magneticVariation
       return nmea.toSentence([
         '$IIVHW',

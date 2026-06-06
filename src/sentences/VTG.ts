@@ -23,7 +23,14 @@ export default function (_app: SignalKApp): SentenceEncoder {
       courseOverGroundMagnetic: number,
       courseOverGroundTrue: number,
       speedOverGround: number
-    ): string {
+    ): string | undefined {
+      if (
+        !Number.isFinite(courseOverGroundMagnetic) ||
+        !Number.isFinite(courseOverGroundTrue) ||
+        !Number.isFinite(speedOverGround)
+      ) {
+        return undefined
+      }
       return nmea.toSentence([
         '$IIVTG',
         nmea.radsToPositiveDeg(courseOverGroundTrue).toFixed(2),

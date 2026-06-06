@@ -59,14 +59,20 @@ export default function (_app: SignalKApp): SentenceEncoder {
     ): string | undefined {
       const wpLat = wp?.position?.latitude
       const wpLon = wp?.position?.longitude
-      if (typeof wpLat !== 'number' || typeof wpLon !== 'number') {
+      if (
+        typeof wpLat !== 'number' ||
+        typeof wpLon !== 'number' ||
+        !Number.isFinite(wpLat) ||
+        !Number.isFinite(wpLon)
+      ) {
         return undefined
       }
       if (
         !Number.isFinite(crossTrackError) ||
         !Number.isFinite(wpDistance) ||
         !Number.isFinite(bearingTrue) ||
-        !Number.isFinite(vmg)
+        !Number.isFinite(vmg) ||
+        wpDistance < 0
       ) {
         return undefined
       }
@@ -81,8 +87,8 @@ export default function (_app: SignalKApp): SentenceEncoder {
         originId,
         nmea.toNmeaDegreesLatitude(wpLat),
         nmea.toNmeaDegreesLongitude(wpLon),
-        Math.abs(nmea.mToNm(wpDistance)).toFixed(2),
-        nmea.radsToPositiveDeg(bearingTrue).toFixed(0),
+        nmea.mToNm(wpDistance).toFixed(2),
+        nmea.radsToRoundedPositiveDegString(bearingTrue),
         nmea.msToKnots(vmg).toFixed(2),
         '',
         'A'
