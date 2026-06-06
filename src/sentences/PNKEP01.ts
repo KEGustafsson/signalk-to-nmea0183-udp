@@ -14,7 +14,9 @@ export default function (_app: SignalKApp): SentenceEncoder {
     sentence: 'PNKEP01',
     title: 'PNKEP,01 - Target Polar speed',
     keys: ['performance.polarSpeed'],
-    f: function (polarSpeed: number): string {
+    f: function (polarSpeed: number): string | undefined {
+      if (!Number.isFinite(polarSpeed)) return undefined
+
       return nmea.toSentence([
         '$PNKEP',
         '01',

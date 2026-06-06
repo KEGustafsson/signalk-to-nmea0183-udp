@@ -245,7 +245,9 @@ export function formatDatetime(datetime8601: unknown): FormattedDatetime {
 // Shared $IIXTE sentence builder used by both the XTE and XTE-GC encoders,
 // which differ only in their title/registry key. Cross-track error sign
 // selects the steer-direction field: negative => R (steer right), else L.
-export function toXteSentence(crossTrackError: number): string {
+export function toXteSentence(crossTrackError: number): string | undefined {
+  if (!Number.isFinite(crossTrackError)) return undefined
+
   return toSentence([
     '$IIXTE',
     'A',
