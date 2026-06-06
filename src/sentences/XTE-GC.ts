@@ -21,14 +21,7 @@ export default function (_app: SignalKApp): SentenceEncoder<[number]> {
     title: 'XTE - Cross-track error (w.r.t. server-configured calcMethod)',
     keys: ['navigation.course.calcValues.crossTrackError'],
     f: function (crossTrackError: number): string {
-      return nmea.toSentence([
-        '$IIXTE',
-        'A',
-        'A',
-        Math.abs(nmea.mToNm(crossTrackError)).toFixed(3),
-        crossTrackError < 0 ? 'R' : 'L',
-        'N'
-      ])
+      return nmea.toXteSentence(crossTrackError)
     }
   }
 }

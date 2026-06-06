@@ -121,7 +121,7 @@ const expectations: Expectation[] = [
   },
   {
     name: 'HDMC',
-    sentence: 'HDM',
+    sentence: 'HDMC',
     title: 'HDM - Heading Magnetic, calculated from True',
     keys: ['navigation.headingTrue', 'navigation.magneticVariation']
   },
@@ -179,11 +179,13 @@ const expectations: Expectation[] = [
   },
   {
     name: 'PNKEP01',
+    sentence: 'PNKEP01',
     title: 'PNKEP,01 - Target Polar speed',
     keys: ['performance.polarSpeed']
   },
   {
     name: 'PNKEP02',
+    sentence: 'PNKEP02',
     title: 'PNKEP,02 - Course (COG) on other tack from 0 to 359°',
     keys: ['performance.tackMagnetic']
   },
@@ -318,7 +320,7 @@ const expectations: Expectation[] = [
   },
   {
     name: 'XTE',
-    title: 'XTE - Cross-track error (w.r.t. Rhumb line)',
+    title: 'XTE - Cross-track error (w.r.t. server-configured calcMethod)',
     keys: ['navigation.course.calcValues.crossTrackError']
   },
   {

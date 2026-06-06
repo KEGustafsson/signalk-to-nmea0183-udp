@@ -11,6 +11,7 @@ import type { SentenceEncoder, SignalKApp } from '../types/plugin'
 
 export default function (_app: SignalKApp): SentenceEncoder {
   return {
+    sentence: 'PNKEP01',
     title: 'PNKEP,01 - Target Polar speed',
     keys: ['performance.polarSpeed'],
     f: function (polarSpeed: number): string {

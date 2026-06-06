@@ -48,12 +48,22 @@ export default function (_app: SignalKApp): SentenceEncoder {
     defaults: ['', undefined, null, undefined, ''],
     f: function (
       datetime8601: string,
-      sog: number | string,
+      sog: number | string | null | undefined,
       cog: number | null | undefined,
-      position: Position,
+      position: Position | null | undefined,
       magneticVariation: number | string
-    ): string {
+    ): string | undefined {
       const datetime = formatDatetime(datetime8601)
+      const lat = position?.latitude
+      const lon = position?.longitude
+      const sogNum = Number(sog)
+      if (
+        typeof lat !== 'number' ||
+        typeof lon !== 'number' ||
+        !Number.isFinite(sogNum)
+      ) {
+        return undefined
+      }
       let magneticVariationDeg = ''
       let magneticVariationDir = ''
       if (typeof magneticVariation === 'number') {
@@ -68,9 +78,9 @@ export default function (_app: SignalKApp): SentenceEncoder {
         '$GPRMC',
         datetime.time,
         'A',
-        toNmeaDegreesLatitude(position.latitude),
-        toNmeaDegreesLongitude(position.longitude),
-        msToKnots(Number(sog)).toFixed(1),
+        toNmeaDegreesLatitude(lat),
+        toNmeaDegreesLongitude(lon),
+        msToKnots(sogNum).toFixed(1),
         cog != null ? radsToPositiveDeg(cog).toFixed(1) : '',
         datetime.date,
         magneticVariationDeg,

@@ -123,7 +123,7 @@ export function toNmeaDegreesLongitude(inVal: unknown): string {
     use in an NMEA0183 sentence. (e.g. DDDMM.MMMM)
   */
 
-  if (typeof inVal !== 'number' || inVal <= -180 || inVal > 180) {
+  if (typeof inVal !== 'number' || inVal < -180 || inVal > 180) {
     throw new Error('invalid input to toNmeaDegreesLongitude: ' + inVal)
   }
 
@@ -193,6 +193,13 @@ export function formatDatetime(datetime8601: unknown): FormattedDatetime {
     return empty
   }
 
+  // Require an explicit timezone designator (Z or ±HH:MM). Without one the
+  // Date constructor parses the string as LOCAL time, making the derived UTC
+  // components environment-dependent.
+  if (!/(Z|[+-]\d{2}:\d{2})$/i.test(datetime8601)) {
+    return empty
+  }
+
   const datetime = new Date(datetime8601)
   if (isNaN(datetime.getTime())) {
     return empty
@@ -219,4 +226,18 @@ export function formatDatetime(datetime8601: unknown): FormattedDatetime {
     year,
     date: day + month + ('00' + year).slice(-2)
   }
+}
+
+// Shared $IIXTE sentence builder used by both the XTE and XTE-GC encoders,
+// which differ only in their title/registry key. Cross-track error sign
+// selects the steer-direction field: negative => R (steer right), else L.
+export function toXteSentence(crossTrackError: number): string {
+  return toSentence([
+    '$IIXTE',
+    'A',
+    'A',
+    Math.abs(mToNm(crossTrackError)).toFixed(3),
+    crossTrackError < 0 ? 'R' : 'L',
+    'N'
+  ])
 }

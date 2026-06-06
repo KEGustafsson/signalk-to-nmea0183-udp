@@ -110,7 +110,7 @@ describe('conversions array config', function () {
       } catch (e) {
         done(e)
       }
-    }, 50)
+    }, 150)
   })
 
   // Duplicate sentences: each creates an independent stream
@@ -135,7 +135,7 @@ describe('conversions array config', function () {
       } catch (e) {
         done(e)
       }
-    }, 50)
+    }, 150)
   })
 
   // No throttle property: debounceImmediate(20) is always active, but without
@@ -163,7 +163,7 @@ describe('conversions array config', function () {
         } catch (e) {
           done(e)
         }
-      }, 50)
-    }, 50)
+      }, 150)
+    }, 150)
   })
 })

@@ -4,7 +4,7 @@ import type { SentenceEncoder, SignalKApp } from '../types/plugin'
 
 export default function (_app: SignalKApp): SentenceEncoder {
   return {
-    sentence: 'HDM',
+    sentence: 'HDMC',
     title: 'HDM - Heading Magnetic, calculated from True',
     keys: ['navigation.headingTrue', 'navigation.magneticVariation'],
     f: function (headingTrue: number, magneticVariation: number): string {

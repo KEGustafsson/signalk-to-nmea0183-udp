@@ -24,6 +24,9 @@ const url = process.argv[2]
 const outFile = process.argv[3]
 const scenarioName = process.argv[4] ?? 'unnamed-scenario'
 const captureSeconds = 9
+// TLS verification stays on unless explicitly disabled, so a remote capture
+// over wss:// can't be silently MITM'd.
+const allowInsecureTls = process.argv.includes('--insecure-tls')
 
 if (!url || !outFile) {
   console.error(
@@ -47,7 +50,9 @@ interface SignalKDelta {
 }
 
 const seen: Record<string, unknown> = {}
-const ws = new WebSocket(url + '?subscribe=none', { rejectUnauthorized: false })
+const ws = new WebSocket(url + '?subscribe=none', {
+  rejectUnauthorized: !allowInsecureTls
+})
 
 ws.on('open', () => {
   ws.send(
@@ -68,7 +73,7 @@ ws.on('message', (data: Buffer) => {
   }
   for (const u of parsed.updates ?? []) {
     for (const v of u.values ?? []) {
-      if (v.path && shouldInclude(v.path) && !(v.path in seen)) {
+      if (v.path && shouldInclude(v.path)) {
         seen[v.path] = v.value
       }
     }

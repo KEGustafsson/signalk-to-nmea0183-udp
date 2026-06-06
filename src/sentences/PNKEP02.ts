@@ -7,6 +7,7 @@ import type { SentenceEncoder, SignalKApp } from '../types/plugin'
 
 export default function (_app: SignalKApp): SentenceEncoder {
   return {
+    sentence: 'PNKEP02',
     title: 'PNKEP,02 - Course (COG) on other tack from 0 to 359°',
     keys: ['performance.tackMagnetic'],
     f: function (tackMagnetic: number): string {

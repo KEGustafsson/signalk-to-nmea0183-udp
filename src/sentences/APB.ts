@@ -39,20 +39,23 @@ export default function (_app: SignalKApp): SentenceEncoder {
       'navigation.course.nextPoint',
       'navigation.magneticVariation'
     ],
-    defaults: [undefined, undefined, undefined, {}, undefined],
+    defaults: [undefined, undefined, undefined, {}, 0],
     f: function (
       xte: number,
       originToDest: number,
       bearingTrue: number,
       nextPoint: NextPoint | null | undefined,
-      magneticVariation: number
+      magneticVariation: number | null | undefined
     ): string {
+      const variation = Number.isFinite(magneticVariation)
+        ? (magneticVariation as number)
+        : 0
       const waypointId = generateWaypointName(nextPoint)
       const bearingOriginToDestMag = nmea.radsToPositiveDeg(
-        nmea.fixAngle(originToDest - magneticVariation)
+        nmea.fixAngle(originToDest - variation)
       )
       const bearingToDestMag = nmea.radsToPositiveDeg(
-        nmea.fixAngle(bearingTrue - magneticVariation)
+        nmea.fixAngle(bearingTrue - variation)
       )
       return nmea.toSentence([
         '$IIAPB',

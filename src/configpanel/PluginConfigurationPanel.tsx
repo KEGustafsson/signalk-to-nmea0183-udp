@@ -443,14 +443,17 @@ export default function PluginConfigurationPanel({
                   <input
                     style={S.input}
                     type="number"
+                    min={0}
+                    step={1}
                     value={conv.throttle ?? 0}
-                    onChange={(e) =>
+                    onChange={(e) => {
+                      const v = parseInt(e.target.value, 10)
                       updateRow(
                         i,
                         'throttle',
-                        parseInt(e.target.value, 10) || 0
+                        Number.isFinite(v) && v >= 0 ? v : 0
                       )
-                    }
+                    }}
                     placeholder="0 = no throttling"
                   />
                 </div>

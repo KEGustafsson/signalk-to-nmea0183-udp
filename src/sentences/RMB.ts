@@ -62,6 +62,14 @@ export default function (_app: SignalKApp): SentenceEncoder {
       if (typeof wpLat !== 'number' || typeof wpLon !== 'number') {
         return undefined
       }
+      if (
+        !Number.isFinite(crossTrackError) ||
+        !Number.isFinite(wpDistance) ||
+        !Number.isFinite(bearingTrue) ||
+        !Number.isFinite(vmg)
+      ) {
+        return undefined
+      }
       const destinationId = generateWaypointName(wp)
       const originId = generateWaypointName(prevWp)
       return nmea.toSentence([

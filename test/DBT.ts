@@ -24,7 +24,7 @@ describe('DBT', function () {
     let count = 0
     const onEmit = (): void => {
       count++
-      if (count >= 2) done()
+      if (count === 2) done()
     }
     const app = createAppWithPlugin(onEmit, 'DBT')
     const stream = app.streambundle.getSelfStream(

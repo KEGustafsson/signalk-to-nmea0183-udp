@@ -20,19 +20,17 @@ export default function (_app: SignalKApp): SentenceEncoder {
     keys: ['navigation.datetime', 'navigation.position'],
     f: function gll(
       datetime8601: unknown,
-      position: Position | null
+      position: Position | null | undefined
     ): string | undefined {
       const datetime = nmea.formatDatetime(datetime8601)
-      if (position !== null) {
-        return nmea.toSentence([
-          '$GPGLL',
-          nmea.toNmeaDegreesLatitude(position.latitude),
-          nmea.toNmeaDegreesLongitude(position.longitude),
-          datetime.time,
-          'A'
-        ])
-      }
-      return undefined
+      if (!position) return undefined
+      return nmea.toSentence([
+        '$GPGLL',
+        nmea.toNmeaDegreesLatitude(position.latitude),
+        nmea.toNmeaDegreesLongitude(position.longitude),
+        datetime.time,
+        'A'
+      ])
     }
   }
 }

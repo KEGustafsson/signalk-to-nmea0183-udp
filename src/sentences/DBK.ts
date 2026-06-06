@@ -7,7 +7,11 @@ export default function (_app: SignalKApp): SentenceEncoder {
     sentence: 'DBK',
     title: 'DBK - Depth Below Keel',
     keys: ['environment.depth.belowKeel'],
-    f: function dbk(depth: number): string {
+    f: function dbk(depth: number): string | undefined {
+      if (!Number.isFinite(depth)) {
+        _app.debug('DBK: skipping emission - invalid depth')
+        return undefined
+      }
       const feet = depth * 3.28084
       const fathoms = depth * 0.546807
       return nmea.toSentence([
