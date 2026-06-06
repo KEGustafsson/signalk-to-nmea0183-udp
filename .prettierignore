@@ -1,0 +1,9 @@
+node_modules
+coverage
+.nyc_output
+.claude
+package-lock.json
+dist
+public
+reports
+.stryker-tmp
