@@ -193,7 +193,14 @@ const createPlugin = function (app: SignalKApp): SignalKPlugin {
     sentences: {},
     start: function (options: PluginOptions): void {
       const udpAddress = options.udp?.address || DEFAULT_UDP_ADDRESS
-      const udpPort = options.udp?.port ?? DEFAULT_UDP_PORT
+      // Coerce to an integer and enforce the valid destination port range;
+      // fall back to the default for missing / NaN / out-of-range values so
+      // sock.send() never receives an invalid port.
+      const rawPort = Math.trunc(Number(options.udp?.port))
+      const udpPort =
+        Number.isInteger(rawPort) && rawPort >= 1 && rawPort <= 65535
+          ? rawPort
+          : DEFAULT_UDP_PORT
 
       const sock = dgram.createSocket('udp4')
       // Don't let the socket keep the host process alive on its own.

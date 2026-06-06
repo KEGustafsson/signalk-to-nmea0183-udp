@@ -356,10 +356,18 @@ export default function PluginConfigurationPanel({
             <input
               style={S.input}
               type="number"
+              min={1}
+              max={65535}
+              step={1}
               value={udpPort}
-              onChange={(e) =>
-                setUdpPort(parseInt(e.target.value, 10) || DEFAULT_UDP_PORT)
-              }
+              onChange={(e) => {
+                const v = parseInt(e.target.value, 10)
+                setUdpPort(
+                  Number.isInteger(v) && v >= 1 && v <= 65535
+                    ? v
+                    : DEFAULT_UDP_PORT
+                )
+              }}
               placeholder={String(DEFAULT_UDP_PORT)}
             />
           </div>

@@ -158,8 +158,11 @@ function runEncoder(
   }
   // The plugin sends sentences over UDP; capture them via the fake socket.
   setUdpSink((message) => emissions.push(message.replace(/\r\n$/, '')))
-  plugin.start({ [encoderName]: true })
-  setUdpSink(null)
+  try {
+    plugin.start({ [encoderName]: true })
+  } finally {
+    setUdpSink(null)
+  }
 
   const keys = encoder.keys as string[]
   const defaults = (encoder.defaults || []) as unknown[]

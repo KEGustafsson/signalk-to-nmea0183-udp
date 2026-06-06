@@ -39,7 +39,6 @@ const factory = require('../src/index')
 
 interface MockApp {
   streambundle: { getSelfStream: (p: string) => Bacon.Bus<unknown> }
-  emit: (n: string, v: unknown) => void
   debug: (m: unknown) => void
   reportOutputMessages?: (n: number) => void
 }
@@ -63,11 +62,11 @@ function probeEncoder(name: string): Promise<PerEncoder> {
         return streams[p]!
       }
     },
-    emit: (n: string, v: unknown): void => {
-      if (n === 'nmea0183out') emitted.push(String(v))
-    },
     debug: (m: unknown): void => {
       const s = String(m)
+      // The plugin sends sentences over UDP and logs each one via debug,
+      // so capture NMEA0183 sentences (lines starting with '$') here.
+      if (s.startsWith('$')) emitted.push(s)
       if (s.includes('not converting') || s.includes('skip')) errors.push(s)
     }
   }

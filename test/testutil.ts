@@ -65,7 +65,10 @@ export function createAppWithPlugin(
   // before start(). Sentences arrive with a trailing CR LF; strip it so
   // assertions can compare against the bare sentence.
   setUdpSink((message) => onEmit('nmea0183out', message.replace(/\r\n$/, '')))
-  plugin.start(options)
-  setUdpSink(null)
+  try {
+    plugin.start(options)
+  } finally {
+    setUdpSink(null)
+  }
   return app
 }
