@@ -10,7 +10,7 @@ export default function (_app: SignalKApp): SentenceEncoder<[number]> {
   return {
     title: 'XTE - Cross-track error (w.r.t. server-configured calcMethod)',
     keys: ['navigation.course.calcValues.crossTrackError'],
-    f: function (crossTrackError: number): string {
+    f: function (crossTrackError: number): string | undefined {
       return nmea.toXteSentence(crossTrackError)
     }
   }

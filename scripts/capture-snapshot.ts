@@ -8,10 +8,10 @@
  * tests under `test/snapshots/`.
  *
  * Usage:
- *   npx tsx scripts/capture-snapshot.ts <ws-url> <out.json> [scenario-name]
+ *   npx tsx scripts/capture-snapshot.ts [--insecure-tls] <ws-url> <out.json> [scenario-name]
  *
  * Example:
- *   npx tsx scripts/capture-snapshot.ts \
+ *   npx tsx scripts/capture-snapshot.ts --insecure-tls \
  *     wss://10.10.10.143/signalk/v1/stream \
  *     test/snapshots/route.json \
  *     "navigate-with-active-route"
@@ -20,17 +20,19 @@ import * as fs from 'fs'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const WebSocket = require('ws')
 
-const url = process.argv[2]
-const outFile = process.argv[3]
-const scenarioName = process.argv[4] ?? 'unnamed-scenario'
-const captureSeconds = 9
+const rawArgs = process.argv.slice(2)
 // TLS verification stays on unless explicitly disabled, so a remote capture
 // over wss:// can't be silently MITM'd.
-const allowInsecureTls = process.argv.includes('--insecure-tls')
+const allowInsecureTls = rawArgs.includes('--insecure-tls')
+const positionalArgs = rawArgs.filter((arg) => arg !== '--insecure-tls')
+const url = positionalArgs[0]
+const outFile = positionalArgs[1]
+const scenarioName = positionalArgs[2] ?? 'unnamed-scenario'
+const captureSeconds = 9
 
 if (!url || !outFile) {
   console.error(
-    'Usage: capture-snapshot.ts <ws-url> <out.json> [scenario-name]'
+    'Usage: capture-snapshot.ts [--insecure-tls] <ws-url> <out.json> [scenario-name]'
   )
   process.exit(2)
 }

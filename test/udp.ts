@@ -57,7 +57,7 @@ describe('UDP output (end-to-end)', function () {
 
     streams['environment.depth.belowTransducer']!.push(10)
 
-    let timer: NodeJS.Timeout
+    let timer: NodeJS.Timeout | undefined
     const timeout = new Promise<string>((_, reject) => {
       timer = setTimeout(
         () => reject(new Error('timed out waiting for UDP datagram')),
@@ -73,7 +73,7 @@ describe('UDP output (end-to-end)', function () {
         'datagram should be the DBT sentence terminated with CR LF'
       )
     } finally {
-      clearTimeout(timer!)
+      if (timer) clearTimeout(timer)
       plugin.stop()
       await new Promise<void>((resolve) => receiver.close(() => resolve()))
     }

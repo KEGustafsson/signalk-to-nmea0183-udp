@@ -236,6 +236,10 @@ describe('sentence encoders', function () {
       const s = mustEncode(enc, 0)
       assert.ok(s.includes(',0.000,L,'))
     })
+    it('skips non-finite xte values', function () {
+      assert.strictEqual(enc.f(Number.NaN), undefined)
+      assert.strictEqual(enc.f(Number.POSITIVE_INFINITY), undefined)
+    })
   })
 
   describe('XTE-GC - cross-track error (server-configured calcMethod)', function () {
@@ -253,13 +257,22 @@ describe('sentence encoders', function () {
       const s = mustEncode(enc, 0)
       assert.ok(s.includes(',0.000,L,'))
     })
+    it('skips non-finite xte values', function () {
+      assert.strictEqual(enc.f(Number.NaN), undefined)
+      assert.strictEqual(enc.f(Number.NEGATIVE_INFINITY), undefined)
+    })
   })
 
   describe('PNKEP01 - target polar speed', function () {
+    const enc = load('PNKEP01')
     it('encodes target speed in knots and km/h', function () {
-      const s = mustEncode(load('PNKEP01'), 5)
+      const s = mustEncode(enc, 5)
       assert.ok(s.startsWith('$PNKEP,01,9.72,N,18.00,K*'))
       assertValidSentence(s)
+    })
+    it('skips non-finite target speeds', function () {
+      assert.strictEqual(enc.f(Number.NaN), undefined)
+      assert.strictEqual(enc.f(Number.POSITIVE_INFINITY), undefined)
     })
   })
 
