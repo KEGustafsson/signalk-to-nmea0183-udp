@@ -1,0 +1,95 @@
+{
+  "name": "signalk-to-nmea0183-udp",
+  "version": "1.0.0",
+  "description": "Signal K server plugin to convert Signal K to NMEA0183 and send it over UDP",
+  "repository": {
+    "url": "https://github.com/KEGustafsson/signalk-to-nmea0183-udp"
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "require": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "sideEffects": false,
+  "engines": {
+    "//": "Floor at 20.10 to support Venus CerboGX firmware (currently Node 20.18.2). Bump back to >=22 once Cerbo ships a newer Node.",
+    "node": ">=20.10"
+  },
+  "files": [
+    "dist",
+    "public",
+    "logo.svg",
+    "docs/screenshots",
+    "README.md",
+    "LICENSE"
+  ],
+  "signalk": {
+    "displayName": "SK to NMEA0183 (UDP)",
+    "appIcon": "./logo.svg"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "build:config": "webpack",
+    "clean": "rimraf dist public",
+    "prebuild": "npm run clean",
+    "typecheck": "tsc --noEmit",
+    "test": "mocha",
+    "coverage": "c8 --reporter=text --reporter=lcov npm test",
+    "mutation": "stryker run",
+    "prettier:check": "prettier --check .",
+    "prettier": "prettier --write .",
+    "format": "npm run prettier",
+    "prepublishOnly": "npm run build && npm run build:config"
+  },
+  "keywords": [
+    "signalk-node-server-plugin",
+    "signalk-plugin-configurator"
+  ],
+  "author": "teppo.kurki@iki.fi",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "@signalk/server-api": "^2.24.0",
+    "@stryker-mutator/core": "^9.6.1",
+    "@stryker-mutator/mocha-runner": "^9.6.1",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^22.19.17",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "baconjs": "^3.0.0",
+    "c8": "^11.0.0",
+    "mocha": "^11.7.1",
+    "prettier": "^3.8.2",
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5",
+    "rimraf": "^6.1.3",
+    "ts-loader": "^9.5.7",
+    "tsx": "^4.21.0",
+    "typescript": "^6.0.3",
+    "webpack": "^5.106.2",
+    "webpack-cli": "^7.0.3"
+  },
+  "c8": {
+    "extension": [
+      ".ts"
+    ],
+    "include": [
+      "src/**/*.ts"
+    ],
+    "exclude": [
+      "test/**",
+      "coverage/**",
+      "dist/**",
+      "src/types/**"
+    ],
+    "all": true,
+    "reporter": [
+      "text",
+      "lcov"
+    ]
+  }
+}
